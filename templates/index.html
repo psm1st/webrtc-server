@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mand.ro WebRTC Streaming</title>
+  <style>
+    body {
+      background: black;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .case {
+      display: flex;
+    }
+
+    .box {
+      overflow: hidden;
+      position: relative;
+      border: 0px solid grey;
+    }
+
+    .hori_1, .hori_2 {
+      width: 400px;
+      height: 400px;
+    }
+
+    video {
+      position: absolute;
+      width: auto;
+      height: 100%;
+    }
+
+    #video1 {
+      transform: rotate(90deg);
+    }
+
+    #video2 {
+      transform: rotate(270deg);
+    }
+  </style>
+</head>
+<body>
+  <div class="case">
+    <h1>change WebRtc</h1>
+    <div class="box hori_1">
+      <video id="video1" autoplay playsinline></video>
+    </div>
+    <div class="box hori_2">
+      <video id="video2" autoplay playsinline></video>
+    </div>
+  </div>
+
+  <script>
+    // Python 서버에서 넘긴 위치 값
+    const leftValue = 10;   // ← 여기에 실제 서버값 반영
+    const rightValue = 20;  // ← 여기에 실제 서버값 반영
+
+    // 위치 적용
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("video1").style.left = `${leftValue}%`;
+      document.getElementById("video2").style.right = `${rightValue}%`;
+    });
+
+    // WebRTC 연결
+    async function start(camera, videoElementId) {
+      const pc = new RTCPeerConnection();
+
+      pc.ontrack = (event) => {
+        document.getElementById(videoElementId).srcObject = event.streams[0];
+      };
+      pc.addTransceiver("video", { direction: "recvonly" });
+
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      const response = await fetch("/offer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sdp: pc.localDescription.sdp,
+          type: pc.localDescription.type,
+          camera: camera
+        })
+      });
+
+      const answer = await response.json();
+      await pc.setRemoteDescription(answer);
+    }
+
+    start(0, "video1");
+    start(1, "video2");
+  </script>
+</body>
+</html>
