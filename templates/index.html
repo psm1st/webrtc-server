@@ -46,31 +46,33 @@
   <div class="case">
     <h1>change WebRtc</h1>
     <div class="box hori_1">
-      <video id="video1" autoplay playsinline></video>
+      <video id="video1" autoplay playsinline muted></video>
     </div>
     <div class="box hori_2">
-      <video id="video2" autoplay playsinline></video>
+      <video id="video2" autoplay playsinline muted></video>
     </div>
   </div>
 
   <script>
-    // Python 서버에서 넘긴 위치 값
-    const leftValue = 10;   // ← 여기에 실제 서버값 반영
-    const rightValue = 20;  // ← 여기에 실제 서버값 반영
+     const leftValue = parseInt("{{ left_value }}");
+     const rightValue = parseInt("{{ right_value }}");
 
-    // 위치 적용
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("video1").style.left = `${leftValue}%`;
       document.getElementById("video2").style.right = `${rightValue}%`;
     });
 
-    // WebRTC 연결
     async function start(camera, videoElementId) {
       const pc = new RTCPeerConnection();
 
       pc.ontrack = (event) => {
-        document.getElementById(videoElementId).srcObject = event.streams[0];
-      };
+  console.log("📹 ontrack received streams:", event.streams);
+  if (event.streams && event.streams[0]) {
+    document.getElementById(videoElementId).srcObject = event.streams[0];
+  } else {
+    console.warn("⚠️ No stream found in ontrack");
+  }
+};
       pc.addTransceiver("video", { direction: "recvonly" });
 
       const offer = await pc.createOffer();
