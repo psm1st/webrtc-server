@@ -1,11 +1,8 @@
-# routers/update.py
-
 from fastapi import APIRouter, Request
 from fastapi.responses import Response
 
 router = APIRouter()
 
-# 글로벌 설정값
 left_value = 17
 right_value = 17
 distorted = False
