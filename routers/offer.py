@@ -14,14 +14,14 @@ async def offer(request: Request):
     pc = RTCPeerConnection()
     pcs.add(pc)
 
-    print(f"📩 Offer received for camera: {camera_index}")
-    print("🎥 Creating new CameraTrack")
+    print(f" Offer received for camera: {camera_index}")
+    print(" Creating new CameraTrack")
     video_track = CameraTrack(camera_index)
     pc.addTrack(video_track)
 
     @pc.on("connectionstatechange")
     async def on_connectionstatechange():
-        print("🔗 Connection state is", pc.connectionState)
+        print(" Connection state is", pc.connectionState)
         if pc.connectionState in ["failed", "closed", "disconnected"]:
             await video_track.stop()  
             await pc.close()
